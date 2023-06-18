@@ -10,10 +10,6 @@ from bs4 import BeautifulSoup
 
 @frappe.whitelist()
 def get_web_pages():
-	static_routes = []
-
-	docs_items = []
-	all_routes = []
 
 	pages = []
 	pages_by_route = {}
@@ -73,8 +69,6 @@ def get_web_pages():
 					route = route.rsplit("index", 1)[0]
 				static_page_add(app, file, route)
 
-		print(pages)
-
 		# Doctype with web views
 		filters = {"has_web_view": 1}#, "allow_guest_to_view": 1, "index_web_pages_for_search": 1}
 		fields = ["name", "is_published_field", "website_search_field", "allow_guest_to_view", "index_web_pages_for_search"]
@@ -105,17 +99,7 @@ def get_web_pages():
 		print(e)
 
 	return [{"route": route, "page": p} for route, p in pages_by_route.items()]
-	# return dict(
-	# 	frappe.qb.from_(eps_log)
-	# 	.select(UnixTimestamp(Date(eps_log.creation)), Sum(eps_log.points))
-	# 	.where(eps_log.user == user)
-	# 	.where(eps_log["type"] != "Review")
-	# 	.where(Date(eps_log.creation) > Date(date) - Interval(years=1))
-	# 	.where(Date(eps_log.creation) < Date(date) + Interval(years=1))
-	# 	.groupby(Date(eps_log.creation))
-	# 	.orderby(Date(eps_log.creation), order=Order.asc)
-	# 	.run()
-	# )
+
 
 
 # @frappe.whitelist()

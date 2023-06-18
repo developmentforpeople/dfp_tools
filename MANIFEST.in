@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include dfp_tools *.css
+recursive-include dfp_tools *.csv
+recursive-include dfp_tools *.html
+recursive-include dfp_tools *.ico
+recursive-include dfp_tools *.js
+recursive-include dfp_tools *.json
+recursive-include dfp_tools *.md
+recursive-include dfp_tools *.png
+recursive-include dfp_tools *.py
+recursive-include dfp_tools *.svg
+recursive-include dfp_tools *.txt
+recursive-exclude dfp_tools *.pyc

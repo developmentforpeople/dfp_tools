@@ -4,4 +4,6 @@
 *.swp
 tags
 dfp_tools/docs/current
+dfp_tools/public/dist
 node_modules/
+__pycache__/

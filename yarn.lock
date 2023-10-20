@@ -2,6 +2,26 @@
 # yarn lockfile v1
 
 
+"@revolist/revogrid@^4.4.0-next.36":
+  version "4.4.0-next.36"
+  resolved "https://registry.yarnpkg.com/@revolist/revogrid/-/revogrid-4.4.0-next.36.tgz#2adbd7caf09e71badc2c38ef8ee7c6e75a47a644"
+  integrity sha512-5yJTq/VRt67QJg5fvDRtAhxYmE++zJrFxtELtBbAe+DSZ6GNMitPq3f1GLi0HZGsRWm2OTwfHm9V+k709lEUjw==
+  dependencies:
+    "@stencil/core" "^3.3.0"
+    lodash "^4.17.21"
+
+"@revolist/vue-datagrid@^4.4.0-next.1":
+  version "4.4.0-next.1"
+  resolved "https://registry.yarnpkg.com/@revolist/vue-datagrid/-/vue-datagrid-4.4.0-next.1.tgz#533ff74257f463414080fb18c0ff6136338f7ec4"
+  integrity sha512-wUdDLZnNN7PytvQtS6wB5/MKAzW+gsQCg8NijeMdxT9/bEf28kIrsTFIxqJkkNHcsvUzjAzypptU2CEpoIwa7w==
+  dependencies:
+    vuex "^3.6.2"
+
+"@stencil/core@^3.3.0":
+  version "3.4.0"
+  resolved "https://registry.yarnpkg.com/@stencil/core/-/core-3.4.0.tgz#8cdfccb5fa9fb3fd2fc63c60c5552b650e9eac21"
+  integrity sha512-kEtPtV6QegME8YgMjWrhS7KktItbhqOpAuK9aXypDdI/7bLU9iM/4DtnQGWY/DARBophk+XRBfNXcE62Bmi0dw==
+
 axios@^0.15.3:
   version "0.15.3"
   resolved "https://registry.yarnpkg.com/axios/-/axios-0.15.3.tgz#2c9d638b2e191a08ea1d6cc988eadd6ba5bdc053"
@@ -23,6 +43,11 @@ follow-redirects@1.0.0:
   dependencies:
     debug "^2.2.0"
 
+lodash@^4.17.21:
+  version "4.17.21"
+  resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.21.tgz#679591c564c3bffaae8454cf0b3df370c3d6911c"
+  integrity sha512-v2kDEe57lecTulaDIuNTPy3Ry4gLGJ6Z1O3vE1krgXZNrsQ+LFTGHVxVjcXPs17LhbZVGedAJv8XZ1tvj5FvSg==
+
 ms@2.0.0:
   version "2.0.0"
   resolved "https://registry.yarnpkg.com/ms/-/ms-2.0.0.tgz#5608aeadfc00be6c2901df5f9861788de0d597c8"
@@ -34,3 +59,8 @@ vuetable-2@^2.0.0-beta.4:
   integrity sha512-sWSdKIPYiATI9hOuPlQ09iSWEFAfhe6sPovl4hK2SemvqvgxLIF8UjG3LwJJC7idWS9UPpK9fRrSXoFJhRcluQ==
   dependencies:
     axios "^0.15.3"
+
+vuex@^3.6.2:
+  version "3.6.2"
+  resolved "https://registry.yarnpkg.com/vuex/-/vuex-3.6.2.tgz#236bc086a870c3ae79946f107f16de59d5895e71"
+  integrity sha512-ETW44IqCgBpVomy520DT5jf8n0zoCac+sxWnn+hMe/CzaSejb/eVw2YToiXYX+Ex/AuHHia28vWTq4goAexFbw==

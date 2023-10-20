@@ -1,4 +1,8 @@
 
+// import Vue from 'vue/dist/vue.js'
+// import Vue from 'vue/dist/vue.js'
+// Vue.config.productionTip = false
+
 import App from './App.vue'
 
 class DFPToolsSitemap {

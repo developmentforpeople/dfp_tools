@@ -6,6 +6,8 @@
 
 <script>
 
+// import Vue from 'vue/dist/vue.js'
+
 import PagesList from './PagesList.vue'
 
 const props = {

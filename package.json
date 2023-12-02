@@ -1,7 +1,5 @@
 {
   "dependencies": {
-    "@revolist/revogrid": "^4.4.0-next.36",
-    "@revolist/vue-datagrid": "^4.4.0-next.1",
-    "vuetable-2": "^2.0.0-beta.4"
+    "element-plus": "^2.4.3"
   }
 }

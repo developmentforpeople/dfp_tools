@@ -12,7 +12,8 @@ import { computed, ref } from 'vue'
 export const useStore = defineStore('store-main', () => {
 	// let doctype = ref("");
 	// let frm = ref(null);
-	let pages = ref([])
+	// let pages = ref([])
+	let routes = ref([])
 	// let docfields = ref([]);
 	// let custom_docfields = ref([]);
 	// let form = ref({
@@ -24,6 +25,7 @@ export const useStore = defineStore('store-main', () => {
 	// let read_only = ref(false);
 	// let is_customize_form = ref(false);
 	// let preview = ref(false);
+	let routes_loading = ref(false)
 	let counter = ref(1)
 	// let drag = ref(false);
 	// let get_animation = "cubic-bezier(0.34, 1.56, 0.64, 1)";
@@ -86,56 +88,65 @@ export const useStore = defineStore('store-main', () => {
 	// }
 
 	async function fetch() {
+		routes_loading.value = true
 		frappe.call('dfp_tools.dfp_tools.page.dfp_website_sitemap.dfp_website_sitemap.get_web_pages').then(r => {
 			console.log('get_web_pages', r)
-			pages.value = []
+			// pages.value = []
+			routes.value = []
 			let i = 10
 			r.message.forEach((item, index) => {
 				// item = { route: 'search', page: [{ app: 'frappe', type: 'file', path: 'frappe/frappe/www/search.html', no_cache: 0, sitemap: 1, doctype: '', doc_name: '', doc_allow_guest_to_view: 0, doc_index_web_pages_for_search: 0, doc_is_published_field: '', doc_website_search_field: '', published: 1 }] }
 
 				// If several items in array, first one is the source extended and last one the active and rendered
 				let page_active = item.page[item.page.length - 1]
-				// Subpages for active page
-				let subpages = []
-				item.page.forEach((subpage, subindex) => {
-					subpages.push({
-						id: i++,
-						label: `/${subpage.route}`,
-						children: [],
 
-						level: 2,
-						renderable_one: subindex === item.page.length - 1,
-						route: subpage.route,
-						app: subpage.app,
-						path: subpage.path,
-						no_cache: subpage.no_cache,
-						sitemap: subpage.sitemap,
-						doctype: subpage.doctype,
-						doc_name: subpage.doc_name,
-						doc_allow_guest_to_view: subpage.doc_allow_guest_to_view,
-						doc_index_web_pages_for_search: subpage.doc_index_web_pages_for_search,
-						doc_is_published_field: subpage.doc_is_published_field,
-						published: subpage.published,
-						doc_website_search_field: subpage.doc_website_search_field,
-						type: subpage.doctype && subpage.doc_name ? `<a href="${frappe.utils.get_form_link(subpage.doctype, subpage.doc_name)}">${subpage.doctype}</a>`: subpage.type,
-						app_and_path_or_doc: page_active.app_and_path_or_doc,
-					})
-				})
-				pages.value.push({
-					id: i++,
-					label: `/${item.route}`,
-					children: subpages,
+				if (item.page.length > 1) {
+					page_active.overrides = [...item.page]
+					// remove last item
+					page_active.overrides.pop()
+					// reverse order
+					page_active.overrides.reverse()
+				}
+				
+				console.log(page_active)
+				routes.value.push(page_active)
 
-					level: 1,
-					route: item.route,//`<a href="/${item.route}">/${item.route}</a>`,
-					type: '',//page_active.doctype && page_active.doc_name ? `<a href="${frappe.utils.get_form_link(page_active.doctype, page_active.doc_name)}">${page_active.doctype}</a>`: page_active.type,
-					app: '',//page_active.app,
-					// extended: item.page.length > 1 ? item.page.length - 1 : '-',
-					app_and_path_or_doc: '',//page_active.app_and_path_or_doc,
-					// app_and_path_or_doc: page_active.type === 'file' ? page_active.path : (page_active.doctype && page_active.doc_name ? `<a href="${frappe.utils.get_form_link(page_active.doctype, page_active.doc_name)}">${page_active.doctype}</a>`: page_active.type),
-					// page: JSON.stringify(page_active),
-					// page_extended: item.page.length > 1 ? JSON.stringify(item.page[0]) : '',
-				})
+
+				// // Subpages for active page
+				// let subpages = []
+				// item.page.forEach((subpage, subindex) => {
+				// 	subpages.push({
+				// 		id: i++,
+				// 		label: `/${subpage.route}`,
+				// 		children: [],
+
+				// 		level: 2,
+				// 		renderable_one: subindex === item.page.length - 1,
+				// 		route: subpage.route,
+				// 		app: subpage.app,
+				// 		path: subpage.path,
+				// 		no_cache: subpage.no_cache,
+				// 		sitemap: subpage.sitemap,
+				// 		doctype: subpage.doctype,
+				// 		doc_name: subpage.doc_name,
+				// 		doc_allow_guest_to_view: subpage.doc_allow_guest_to_view,
+				// 		doc_index_web_pages_for_search: subpage.doc_index_web_pages_for_search,
+				// 		doc_is_published_field: subpage.doc_is_published_field,
+				// 		published: subpage.published,
+				// 		doc_website_search_field: subpage.doc_website_search_field,
+				// 		type: subpage.doctype && subpage.doc_name ? `<a href="${frappe.utils.get_form_link(subpage.doctype, subpage.doc_name)}">${subpage.doctype}</a>`: subpage.type,
+				// 	})
+				// })
+				// pages.value.push({
+				// 	id: i++,
+				// 	label: `/${item.route}`,
+				// 	children: subpages,
+
+				// 	level: 1,
+				// 	route: item.route,//`<a href="/${item.route}">/${item.route}</a>`,
+				// 	type: '',//page_active.doctype && page_active.doc_name ? `<a href="${frappe.utils.get_form_link(page_active.doctype, page_active.doc_name)}">${page_active.doctype}</a>`: page_active.type,
+				// 	app: '',//page_active.app,
+				// })
 
 				// data_source.value.push({
 				// 	id: i++,
@@ -172,7 +183,8 @@ export const useStore = defineStore('store-main', () => {
 					// 'doc_website_search_field':
 
 			})
-			console.log('pages', pages.value)
+			console.log('routes', routes.value)
+			routes_loading.value = false
 		})
 
 
@@ -430,8 +442,10 @@ export const useStore = defineStore('store-main', () => {
 	// }
 
 	return {
-		pages,
-		counter,
+		// pages,
+		routes_loading,
+		routes,
+		// counter,
 		fetch,
 		// form,
 		// dirty,

@@ -38,16 +38,17 @@ def get_web_pages():
 		"doc_index_web_pages_for_search": "",
 		"doc_is_published_field": "",
 		"doc_website_search_field": "",
-		"app_and_path_or_doc": "",
 	})
 
 	def static_page_add(app, path, route):
 		page = page_tpl.copy()
 		page.app = app
+		page.file_or_doctype = path # used for table sorting
 		page.type = "file"
 		page.path = path
 		page.route = route
-		page.app_and_path_or_doc = path
+		page.route_absolute = f"/{route}"
+		page.edit = ""
 		if route in pages_by_route:
 			pages_by_route[route].append(page)
 		else:
@@ -55,9 +56,11 @@ def get_web_pages():
 
 	def doctype_page_add(doctype, doc_page):
 		page = page_tpl.copy()
-		page.app = _("Into site DB")
+		page.app = ""
+		page.file_or_doctype = _(doctype.name) # used for table sorting
 		page.type = "doctype"
 		page.route = doc_page.route
+		page.route_absolute = f"/{doc_page.route}"
 		page.doctype = doctype.name
 		page.doc_name = doc_page.name
 		page.doc_allow_guest_to_view = doctype.allow_guest_to_view
@@ -65,7 +68,7 @@ def get_web_pages():
 		page.doc_is_published_field = doctype.is_published_field
 		page.doc_website_search_field = doctype.website_search_field
 		url = f"""/app/{doctype.name.lower().replace(" ", "-")}/{doc_page.name.lower().replace(" ", "-")}"""
-		page.app_and_path_or_doc = f"""<a href="{quote(url)}" target="_blank">{doc_page.name}</a>"""
+		page.edit = quote(url)
 
 		if doc_page.route and doc_page.route in pages_by_route:
 			pages_by_route[doc_page.route].append(page)
@@ -145,12 +148,18 @@ def get_web_pages():
 			# path_to_index_2 = os.path.join(app_path_base, "www")
 
 			path_to_index = frappe.get_app_path(app, "www")
-			files_to_index = glob(path_to_index + "/**/*.html", recursive=True)
-			files_to_index.extend(glob(path_to_index + "/**/*.md", recursive=True))
+			# files_to_index = glob(path_to_index + "/**/*.html", recursive=True)
+			# files_to_index.extend(glob(path_to_index + "/**/*.md", recursive=True))
+			# files_to_index.extend(glob(path_to_index + "/**/*.xml", recursive=True))
+			# files_to_index.extend(glob(path_to_index + "/**/*.txt", recursive=True))
+			files_to_index = [file for file in glob(path_to_index + "/**/*", recursive=True) if (not file.endswith(".py") and not file.endswith(".pyc") and not file.endswith("__pycache__"))]
 			for file in files_to_index:
-				route = os.path.relpath(file, path_to_index).split(".", maxsplit=1)[0]
-				if route.endswith("index"):
-					route = route.rsplit("index", 1)[0]
+				if file.endswith(".html") or file.endswith(".md"):
+					route = os.path.relpath(file, path_to_index).split(".", maxsplit=1)[0]
+					if route.endswith("index"):
+						route = route.rsplit("index", 1)[0]
+				else:
+					route = os.path.relpath(file, path_to_index)
 				file_without_bench = file[len(apps_path)+1:]
 				static_page_add(app=app, path=file_without_bench, route=route)
 

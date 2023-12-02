@@ -1,44 +1,72 @@
 <template>
 
-	<!-- <pre>{{ store }}</pre>
+	<!-- <pre>{{ store }}</pre> -->
+	<!-- <pre>store.routes: {{ store.routes }}</pre> -->
 
-	<pre>{{ store.pages }}</pre> -->
+	<!-- <el-empty v-if="!store.routes.length" description="No pages to show :)" /> -->
 
-	<el-empty v-if="!store.pages.length" description="No pages to show :)" />
+	<div v-loading="store.routes_loading">
 
-	<div v-else>
-		<el-input v-model="filterText" placeholder="Filter keyword" />
-
-		<el-tree
-			ref="treeRef"
-			class="filter-tree"
-			:data="store.pages"
-			show-checkbox
-			node-key="id"
-			:props="defaultProps"
+		<el-table
+			:data="filterTableData"
+			style="width: 100%"
+			border
 			default-expand-all
-			:filter-node-method="filterNode"
-			:expand-on-click-node="false"
 		>
-			<template #default="{ node, data }">
-				<span v-if="data.level==1">
-					/{{ data.route }}
-					<el-icon><Link /></el-icon>
-				</span>
-				<span v-if="data.level==2">
-					<el-text :tag="!data.renderable_one ? 'del' : 'span'">
-						<!-- <span>{{ node.label }}</span> -->
-						<span>
-							<span v-if="data.app"><strong>{{ data.app }}</strong></span>
-							<span v-if="data.doctype">[{{ __(data.doctype) }}]</span>
-							<span v-if="data.app_and_path_or_doc" v-html="data.app_and_path_or_doc"></span>
-							<!-- &nbsp; &nbsp;|&nbsp; &nbsp; <a @click="append(data)"> Append </a>
-							<a style="margin-left: 8px" @click="remove(node, data)"> Delete </a> -->
+			<el-table-column prop="route_absolute" label="Path" sortable>
+				<template #default="scope">
+					<el-link icon="link" :href="scope.row.route_absolute">
+						{{ scope.row.route_absolute }}
+					</el-link>
+				</template>
+			</el-table-column>
+
+			<!-- <el-table-column prop="path" label="System file" sortable /> -->
+			<!-- <el-table-column prop="address" label="Address" sortable /> -->
+
+			<!-- <el-table-column prop="doctype" label="DocType" sortable /> -->
+			<el-table-column prop="file_or_doctype" label="File or entry" sortable>
+				<!-- width="130" fixed="right" -->
+				<template #default="scope">
+					<el-link v-if="scope.row.doctype"
+						icon="link"
+						type="primary"
+						size="small"
+						:href="scope.row.edit"
+						:title="scope.row.doc_name"
+					>
+					<!-- <el-icon><Link /></el-icon> -->
+					{{ __(scope.row.doctype) }}</el-link>
+					<span v-else>
+						{{ scope.row.path }}
+						<span v-for="p, k in scope.row.overrides">
+							<br>
+							<el-tooltip :content="__('Overrided file #{0}', [k])">
+								<del>{{ p.path }}</del>
+							</el-tooltip>
 						</span>
-					</el-text>
-				</span>
-			</template>
-		</el-tree>
+					</span>
+				</template>
+			</el-table-column>
+
+			<el-table-column align="right">
+				<template #header>
+					<el-input v-model="search" size="small" placeholder="Type to search" />
+				</template>
+				<template #default="scope">
+					<el-button
+						size="small"
+						@click="handleEdit(scope.$index, scope.row)"
+					>Edit</el-button>
+					<el-button
+						size="small"
+						type="danger"
+						@click="handleDelete(scope.$index, scope.row)"
+					>Delete</el-button>
+				</template>
+			</el-table-column>
+
+		</el-table>
 
 	</div>
 
@@ -49,62 +77,108 @@
 <script setup>
 console.log('DFP Website Sitemap: App.vue loaded')
 
+import { ref, watch, computed } from 'vue'
 import { useStore } from './store'
 
-let store = useStore()
-
-// import { ref } from 'vue'
-
-
-import { ref, watch } from 'vue'
-import { ElTree } from 'element-plus'
-
-// interface Tree {
-//   [key: string]: any
-// }
-
-const filterText = ref('')
-const treeRef = ref()
-
-const defaultProps = {
-  children: 'children',
-  label: 'label',
-}
-
-watch(filterText, (val) => {
-  treeRef.value.filter(val)
-})
-
-const filterNode = (value, page) => {
-  if (!value) return true
-  return page.label.includes(value)
-}
-
-
+const store = useStore()
 store.fetch()
 
+// const filterText = ref('')
+// const treeRef = ref()
 
-let id = 1000
-const append = (data) => {
-	const newChild = { id: id++, label: 'testtest', children: [] }
-	if (!data.children) {
-		data.children = []
-	}
-	data.children.push(newChild)
-	store.pages.value = [...store.pages.value]
+// const defaultProps = {
+//   children: 'children',
+//   label: 'label',
+// }
+
+// watch(filterText, (val) => {
+//   treeRef.value.filter(val)
+// })
+
+// const filterNode = (value, page) => {
+//   if (!value) return true
+//   return page.label.includes(value)
+// }
+
+
+
+
+const search = ref('')
+const filterTableData = computed(() =>
+	store.routes.filter(data => {
+		let searched_string = `${data.route_absolute} ${data.file_or_doctype}`.toLowerCase()
+		return !search.value || searched_string.includes(search.value.toLowerCase())
+	})
+)
+const handleEdit = (index, row) => {
+	console.log(index, row)
+}
+const handleDelete = (index, row) => {
+	console.log(index, row)
 }
 
-const remove = (node, data) => {
-	const parent = node.parent
-	const children = parent.data.children || parent.data
-	const index = children.findIndex((d) => d.id === data.id)
-	children.splice(index, 1)
-	store.pages.value = [...store.pages.value]
-}
+// let id = 1000
+// const append = (data) => {
+// 	const newChild = { id: id++, label: 'testtest', children: [] }
+// 	if (!data.children) {
+// 		data.children = []
+// 	}
+// 	data.children.push(newChild)
+// 	store.pages.value = [...store.pages.value]
+// }
+
+// const remove = (node, data) => {
+// 	const parent = node.parent
+// 	const children = parent.data.children || parent.data
+// 	const index = children.findIndex((d) => d.id === data.id)
+// 	children.splice(index, 1)
+// 	store.pages.value = [...store.pages.value]
+// }
 
 // const handleClick = () => {
 //   console.log('Botón clickeado')
 // }
+
+// const tableData = ref([
+//   {
+//     id: 1,
+//     date: '2016-05-02',
+//     name: 'wangxiaohu',
+//     address: 'No. 189, Grove St, Los Angeles',
+//   },
+//   {
+//     id: 2,
+//     date: '2016-05-04',
+//     name: 'wangxiaohu',
+//     address: 'No. 189, Grove St, Los Angeles',
+//   },
+//   {
+//     id: 3,
+//     date: '2016-05-01',
+//     name: 'wangxiaohu',
+//     address: 'No. 189, Grove St, Los Angeles',
+//     children: [
+//       {
+//         id: 31,
+//         date: '2016-05-01',
+//         name: 'wangxiaohu',
+//         address: 'No. 189, Grove St, Los Angeles',
+//       },
+//       {
+//         id: 32,
+//         date: '2016-05-01',
+//         name: 'wangxiaohu',
+//         address: 'No. 189, Grove St, Los Angeles',
+//       },
+//     ],
+//   },
+//   {
+//     id: 4,
+//     date: '2016-05-03',
+//     name: 'wangxiaohu',
+//     address: 'No. 189, Grove St, Los Angeles',
+//   },
+// ])
 
 </script>
 

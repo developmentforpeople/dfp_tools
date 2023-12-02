@@ -1,11 +1,5 @@
 <template>
-
-	<!-- <pre>{{ store }}</pre> -->
-	<!-- <pre>store.routes: {{ store.routes }}</pre> -->
-
-	<!-- <el-empty v-if="!store.routes.length" description="No pages to show :)" /> -->
-
-	<div v-loading="store.routes_loading">
+	<div class="dfp-website-sitemap-app" v-loading="store.routes_loading">
 
 		<el-table
 			:data="filterTableData"
@@ -20,11 +14,7 @@
 					</el-link>
 				</template>
 			</el-table-column>
-
-			<!-- <el-table-column prop="path" label="System file" sortable /> -->
-			<!-- <el-table-column prop="address" label="Address" sortable /> -->
-
-			<!-- <el-table-column prop="doctype" label="DocType" sortable /> -->
+			<!-- <el-table-column prop="sitemap" label="sitemap" sortable /> -->
 			<el-table-column prop="file_or_doctype" label="File or entry" sortable>
 				<!-- width="130" fixed="right" -->
 				<template #default="scope">
@@ -69,7 +59,6 @@
 		</el-table>
 
 	</div>
-
 </template>
 
 
@@ -83,9 +72,6 @@ import { useStore } from './store'
 const store = useStore()
 store.fetch()
 
-// const filterText = ref('')
-// const treeRef = ref()
-
 // const defaultProps = {
 //   children: 'children',
 //   label: 'label',
@@ -94,14 +80,6 @@ store.fetch()
 // watch(filterText, (val) => {
 //   treeRef.value.filter(val)
 // })
-
-// const filterNode = (value, page) => {
-//   if (!value) return true
-//   return page.label.includes(value)
-// }
-
-
-
 
 const search = ref('')
 const filterTableData = computed(() =>
@@ -117,77 +95,12 @@ const handleDelete = (index, row) => {
 	console.log(index, row)
 }
 
-// let id = 1000
-// const append = (data) => {
-// 	const newChild = { id: id++, label: 'testtest', children: [] }
-// 	if (!data.children) {
-// 		data.children = []
-// 	}
-// 	data.children.push(newChild)
-// 	store.pages.value = [...store.pages.value]
-// }
-
-// const remove = (node, data) => {
-// 	const parent = node.parent
-// 	const children = parent.data.children || parent.data
-// 	const index = children.findIndex((d) => d.id === data.id)
-// 	children.splice(index, 1)
-// 	store.pages.value = [...store.pages.value]
-// }
-
-// const handleClick = () => {
-//   console.log('Botón clickeado')
-// }
-
-// const tableData = ref([
-//   {
-//     id: 1,
-//     date: '2016-05-02',
-//     name: 'wangxiaohu',
-//     address: 'No. 189, Grove St, Los Angeles',
-//   },
-//   {
-//     id: 2,
-//     date: '2016-05-04',
-//     name: 'wangxiaohu',
-//     address: 'No. 189, Grove St, Los Angeles',
-//   },
-//   {
-//     id: 3,
-//     date: '2016-05-01',
-//     name: 'wangxiaohu',
-//     address: 'No. 189, Grove St, Los Angeles',
-//     children: [
-//       {
-//         id: 31,
-//         date: '2016-05-01',
-//         name: 'wangxiaohu',
-//         address: 'No. 189, Grove St, Los Angeles',
-//       },
-//       {
-//         id: 32,
-//         date: '2016-05-01',
-//         name: 'wangxiaohu',
-//         address: 'No. 189, Grove St, Los Angeles',
-//       },
-//     ],
-//   },
-//   {
-//     id: 4,
-//     date: '2016-05-03',
-//     name: 'wangxiaohu',
-//     address: 'No. 189, Grove St, Los Angeles',
-//   },
-// ])
-
 </script>
 
 
 <style lang="scss">
-// @import 'dfp_tools/public/js/libs/element-plus@2.4.3--dist--index.css';
-// @import '@element-plus/dist/index.css';
+@import 'element-plus/dist/index.css';
 </style>
 
 <style lang="scss" scoped>
-
 </style>

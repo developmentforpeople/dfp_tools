@@ -1,14 +1,8 @@
 import os
 import frappe
 from frappe import _
-# from frappe.query_builder import Interval, Order
-# from frappe.query_builder.functions import Date, Sum, UnixTimestamp
-# from frappe.utils import getdate
 from glob import glob
-# from frappe.search.website_search import get_static_pages_from_all_apps
-# from bs4 import BeautifulSoup
 from urllib.parse import quote
-
 
 
 @frappe.whitelist()
@@ -22,7 +16,6 @@ def doctypes_with_webview():
 @frappe.whitelist()
 def get_web_pages():
 
-	# pages = []
 	pages_by_route = {}
 
 	page_tpl = frappe._dict({
@@ -76,45 +69,6 @@ def get_web_pages():
 			pages_by_route[doc_page.route] = [page]
 
 	try:
-
-		# from urllib.parse import quote
-		# from frappe.utils import get_url
-		# from frappe.website.router import get_pages
-		# from frappe.model.document import get_controller
-		# def get_public_pages_from_doctypes():
-		# 	"""Returns pages from doctypes that are publicly accessible"""
-		# 	# def get_sitemap_routes():
-		# 	routes = {}
-		# 	doctypes_with_web_view = frappe.get_all(
-		# 		"DocType",
-		# 		filters={"has_web_view": True, "allow_guest_to_view": True},
-		# 		pluck="name",
-		# 	)
-		# 	for doctype in doctypes_with_web_view:
-		# 		controller = get_controller(doctype)
-		# 		meta = frappe.get_meta(doctype)
-		# 		condition_field = meta.is_published_field or controller.website.condition_field
-		# 		if not condition_field:
-		# 			continue
-		# 		try:
-		# 			res = frappe.get_all(
-		# 				doctype,
-		# 				fields=["route", "name", "modified"],
-		# 				filters={condition_field: True},
-		# 			)
-		# 			for r in res:
-		# 				routes[r.route] = {
-		# 					"doctype": doctype,
-		# 					"name": r.name,
-		# 					"modified": r.modified,
-		# 				}
-		# 		except Exception as e:
-		# 			if not frappe.db.is_missing_column(e):
-		# 				raise e
-		# 	return routes
-		# 	# # return frappe.cache().get_value("sitemap_routes", get_sitemap_routes)
-		# 	# return get_sitemap_routes()
-
 		# pages = get_pages()
 		# links = []
 		# for route, page in pages.items():
@@ -138,15 +92,10 @@ def get_web_pages():
 		# 	links.append({"loc": get_url(quote((route or "").encode("utf-8")))})
 		# print("links", links)
 
-
-
 		bench_path = frappe.utils.get_bench_path()
 		apps_path = os.path.join(bench_path, "apps")
 		apps = frappe.get_installed_apps()
 		for app in apps:
-			# app_path_base = frappe.get_app_path(app_name=app)
-			# path_to_index_2 = os.path.join(app_path_base, "www")
-
 			path_to_index = frappe.get_app_path(app, "www")
 			# files_to_index = glob(path_to_index + "/**/*.html", recursive=True)
 			# files_to_index.extend(glob(path_to_index + "/**/*.md", recursive=True))
@@ -188,15 +137,9 @@ def get_web_pages():
 					doctype_page_add(doctype=doctype, doc_page=doc_page)
 				# all_routes += [route.route for route in docs]
 
-		# print(pages)
-		# print(pages_by_route)
-
-
 	except Exception as e:
 		print(e)
 
-	# sorted_pages = sorted(pages_by_route, key=lambda x: x.route)
-	# sort dict by key
 	sorted_pages = {k: pages_by_route[k] for k in sorted(pages_by_route)}
 
 	return [{"route": route, "page": p} for route, p in sorted_pages.items()]

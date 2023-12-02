@@ -23,7 +23,7 @@ export const useStore = defineStore('store-main', () => {
 	async function fetch() {
 		routes_loading.value = true
 		frappe.call('dfp_tools.dfp_tools.page.dfp_website_sitemap.dfp_website_sitemap.get_web_pages').then(r => {
-			console.log('get_web_pages', r)
+			// console.log('get_web_pages', r)
 			routes.value = []
 			r.message.forEach((item, index) => {
 				// If several items in array, first one is the source extended and last one the active and rendered
@@ -40,7 +40,7 @@ export const useStore = defineStore('store-main', () => {
 				console.log(page_active)
 				routes.value.push(page_active)
 			})
-			console.log('routes', routes.value)
+			// console.log('routes', routes.value)
 			routes_loading.value = false
 		})
 	}

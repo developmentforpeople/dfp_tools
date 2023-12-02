@@ -2,6 +2,7 @@ import { createApp } from 'vue'
 import { createPinia } from 'pinia'
 import ElementPlus from 'element-plus'
 // import 'element-plus/dist/index.css'
+import { useStore } from './store'
 
 
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
@@ -13,7 +14,6 @@ import { registerGlobalComponents } from './globals.js'
 
 class DFPWebsiteSitemap {
 	constructor({ wrapper, page, website_sitemap}) {
-		console.log('DFPWebsiteSitemap.constructor')
 		this.$wrapper = $(wrapper)
 		this.page = page
 		this.website_sitemap = website_sitemap
@@ -37,8 +37,8 @@ class DFPWebsiteSitemap {
 
 		// setup page actions
 		this.page.add_inner_button(__('Load pages'), () => {
-			// this.app.$root.$emit('pages-load')
-			alert('Load pages')
+			const store = useStore()
+			store.fetch()
 		})
 		// 	this.primary_btn = this.page.set_primary_action(__('Save'), () =>
 	// 		this.store.save_changes()

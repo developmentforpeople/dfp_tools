@@ -2,7 +2,8 @@ import os
 import frappe
 from frappe import _
 from glob import glob
-from urllib.parse import quote
+# from urllib.parse import quote
+from frappe.website.path_resolver import resolve_redirect
 
 
 @frappe.whitelist()
@@ -23,8 +24,11 @@ def get_web_pages():
 		"app": "",
 		"type": "", # static | doctype
 		"path": "", # static file path
-		"no_cache": "",
-		"sitemap": "",
+		"route": "",
+		"route_absolute": "",
+		"redirected_301": "",
+		# "no_cache": "",
+		# "sitemap": "",
 		"doctype": "",
 		"doc_name": "",
 		"doc_allow_guest_to_view": "",
@@ -41,7 +45,7 @@ def get_web_pages():
 		page.path = path
 		page.route = route
 		page.route_absolute = f"/{route}"
-		page.edit = ""
+		# page.edit = ""
 		if route in pages_by_route:
 			pages_by_route[route].append(page)
 		else:
@@ -60,8 +64,8 @@ def get_web_pages():
 		page.doc_index_web_pages_for_search = doctype.index_web_pages_for_search
 		page.doc_is_published_field = doctype.is_published_field
 		page.doc_website_search_field = doctype.website_search_field
-		url = f"""/app/{doctype.name.lower().replace(" ", "-")}/{doc_page.name.lower().replace(" ", "-")}"""
-		page.edit = quote(url)
+		# url = f"""/app/{doctype.name.lower().replace(" ", "-")}/{doc_page.name.lower().replace(" ", "-")}"""
+		# page.edit = quote(url)
 
 		if doc_page.route and doc_page.route in pages_by_route:
 			pages_by_route[doc_page.route].append(page)
@@ -138,7 +142,16 @@ def get_web_pages():
 				# all_routes += [route.route for route in docs]
 
 	except Exception as e:
-		print(e)
+		frappe.log_error("Error in DFP website sitemap get_web_pages", e)
+
+	for path, p in pages_by_route.items():
+		try:
+			resolve_redirect(path=path)
+		except frappe.Redirect:
+			for page in p:
+				page.redirected_301 = frappe.flags.redirect_location
+		except Exception as e:
+			frappe.log_error("Error in DFP website sitemap get_web_pages", e)
 
 	sorted_pages = {k: pages_by_route[k] for k in sorted(pages_by_route)}
 

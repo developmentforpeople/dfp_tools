@@ -1,9 +1,37 @@
+from typing import Tuple
+from typing import Any
 import os
+import re
+from glob import glob
+from werkzeug.wrappers import Response
 import frappe
 from frappe import _
-from glob import glob
-# from urllib.parse import quote
 from frappe.website.path_resolver import resolve_redirect
+from frappe.website.page_renderers.template_page import TemplatePage
+from frappe.website.page_renderers.error_page import ErrorPage
+from frappe.website.page_renderers.not_found_page import NotFoundPage
+from frappe.website.page_renderers.not_permitted_page import NotPermittedPage
+from frappe.website.page_renderers.redirect_page import RedirectPage
+from frappe.website.path_resolver import PathResolver
+from bs4 import BeautifulSoup
+# from frappe.utils import set_request
+# from frappe.website.serve import get_response_content
+from frappe.search.website_search import WebsiteSearch
+from frappe.search.website_search import INDEX_NAME
+# from frappe.search.website_search import get_static_pages_from_all_apps
+# from frappe.search.website_search import slugs_with_web_view
+from frappe.website.router import get_pages
+
+
+WEBSITE_SEARCH_INDEX_IGNORE_LIST = [
+	"app", "_test", "list", "search", "printview", "printpreview", "message", "error", "404", "502", "examples", "access", "modified_doc_alert", "confirm_workflow_action", "third_party_apps", "tests", "unsubscribe", "qrcode", "payment_setup_certification", "login", "update-password", "complete_signup", "me", "integrations/gcalendar-success"
+]
+WEBSITE_SEARCH_INDEX_IGNORE_LIST_STARTSWITH = [
+	"_test/",
+]
+WEBSITE_SEARCH_INDEX_IGNORE_LIST_ENDSWITH = [
+	".js", ".css", ".xml"
+]
 
 
 @frappe.whitelist()
@@ -73,29 +101,6 @@ def get_web_pages():
 			pages_by_route[doc_page.route] = [page]
 
 	try:
-		# pages = get_pages()
-		# links = []
-		# for route, page in pages.items():
-		# 	# page:
-		# 	# 'basename': 'printview.html'
-		# 	# 'basepath': '/workspace/development/jb_bench/apps/frappe/frappe/www'
-		# 	# 'page_or_generator': 'Page'
-		# 	# 'template': 'www/printview.html'
-		# 	# 'route': 'printview'
-		# 	# 'name': 'printview'
-		# 	# 'page_name': 'printview'
-		# 	# 'controller_path': '/workspace/development/jb_bench/apps/frappe/frappe/www/printview.py'
-		# 	# 'controller': 'frappe.www.printview'
-		# 	# 'base_template': 'templates/web.html'
-		# 	# 'source': '<!DOCTYPE html>\n<html lang="{{ lang }}"...
-		# 	# 'title': 'Printview'
-		# 	# 'no_cache': 1
-		# 	# 'sitemap': 0
-		# 	links.append({"loc": get_url(quote(page.name.encode("utf-8")))})
-		# for route, data in get_public_pages_from_doctypes().items():
-		# 	links.append({"loc": get_url(quote((route or "").encode("utf-8")))})
-		# print("links", links)
-
 		bench_path = frappe.utils.get_bench_path()
 		apps_path = os.path.join(bench_path, "apps")
 		apps = frappe.get_installed_apps()
@@ -156,3 +161,156 @@ def get_web_pages():
 	sorted_pages = {k: pages_by_route[k] for k in sorted(pages_by_route)}
 
 	return [{"route": route, "page": p} for route, p in sorted_pages.items()]
+
+
+def get_render_instance(path:str) -> Tuple[(NotFoundPage | RedirectPage | TemplatePage | Any | None), str]:
+	endpoint = path
+	renderer_instance = None
+	try:
+		path_resolver = PathResolver(path)
+		endpoint, renderer_instance = path_resolver.resolve()
+		print("renderer_instance: ", type(renderer_instance))
+		return renderer_instance, endpoint
+	except Exception as e:
+		pass
+	return None, endpoint
+
+
+def get_response(path=None):
+	"""Resolves path and renders page"""
+	response = None
+
+	try:
+		renderer, endpoint = get_render_instance(path=path)
+		response = renderer.render()
+	except frappe.Redirect:
+		return RedirectPage(endpoint or path, http_status_code).render()
+	except frappe.PermissionError as e:
+		response = NotPermittedPage(endpoint, http_status_code, exception=e).render()
+	except frappe.PageDoesNotExistError:
+		response = NotFoundPage(endpoint, http_status_code).render()
+	except Exception as e:
+		response = ErrorPage(exception=e).render()
+
+	return response
+
+
+@frappe.whitelist()
+def build_index_for_all_routes():
+
+	from frappe.utils import get_url
+	from frappe.utils import nowdate
+	from urllib.parse import quote
+
+	from frappe.www.sitemap import get_public_pages_from_doctypes
+	pages = []
+	# File system files
+	for route, page in get_pages().items():
+		pages.append({
+			"route": route,
+			"sitemap": 1 if page.sitemap else 0,
+			"loc": get_url(quote(page.name.encode("utf-8"))),
+			"lastmod": nowdate(),
+			"page": page,
+		})
+	# DocType pages
+	for route, data in get_public_pages_from_doctypes().items():
+		pages.append({
+			"route": route,
+			"loc": get_url(quote((route or "").encode("utf-8"))),
+			"lastmod": f"{data['modified']:%Y-%m-%d}",
+			"doc_type": data["doctype"],
+			"doc_name": data["name"],
+		})
+	print("pages", pages)
+
+
+	routes_response = {}
+	routes_error = {}
+
+	frappe.local.no_cache = True
+	user = frappe.session.user
+	frappe.set_user("Guest")
+	try:
+		for page in pages:
+			route = page["route"]
+			if route in WEBSITE_SEARCH_INDEX_IGNORE_LIST or any([route.startswith(x) for x in WEBSITE_SEARCH_INDEX_IGNORE_LIST_STARTSWITH]) or any([route.endswith(x) for x in WEBSITE_SEARCH_INDEX_IGNORE_LIST_ENDSWITH]):
+				print(f"route: {route} IGNORED!")
+				continue
+			print("process route: ", route)
+			try:
+				# TODO: probablemente el path resolver me la pele pq el status code me da info suficiente
+				# TODO: pensar si tiene sentido para sacar extra info del 
+				renderer_instance, endpoint = get_render_instance(path=route)
+				print(type(renderer_instance))
+
+				final_path = endpoint
+				print("final_path", final_path) # Maybe it is redirected to /zzz
+
+				response = renderer_instance.render()
+				if response.status_code == 200:
+					routes_response[route] = response
+				else:
+					routes_response[route] = response.status_code
+			except Exception as e:
+				print(e)
+				routes_error[route] = {
+					"error": type(e).__name__,
+					"description": e.args[0] if e.args else "",
+				}
+				print(e)
+	except Exception as e:
+		print(e)
+		pass
+	finally:
+		frappe.clear_messages()
+		frappe.set_user(user)
+
+	# messages = frappe.local.message_log
+
+	# frappe.set_user(user)
+
+	print("routes_error", routes_error)
+	print("routes_response", routes_response)
+
+
+
+	# data-doctype="Wiki Page" > wiki-content
+
+
+	items_to_index = []
+
+	for route, r in routes_response.items():
+		# print(r, routes_response[route])
+		try:
+			if type(r) != Response or not r.response or r.status_code != 200:
+				print(f"Algo no va bien con esta response! {route}", r)
+				continue
+			html = r.get_data(as_text=True)
+			# print("Response", r.response)
+			soup = BeautifulSoup(html, "html.parser")
+			title = soup.title.text.strip() if soup.title else route
+
+			page_content = soup.find(class_="page_content")
+			if not page_content:
+				page_content = soup.find(class_="wiki-content")
+			if not page_content:
+				frappe.log_error(f"Error in DFP website sitemap get_document_to_index: {route}", "No page_content or wiki-page-content found")
+
+			text_content = page_content.text if page_content else ""
+			# Reemplazar múltiples espacios, tabuladores y saltos de línea consecutivos por un solo espacio
+			text_content_cleaned = re.sub(r'[\s]+', ' ', text_content).strip()
+
+			items_to_index.append(frappe._dict(title=title, content=text_content_cleaned, path=route))
+		except Exception as e:
+			print(e)
+			pass
+
+	from frappe.utils.synchronization import filelock
+	with filelock("building_website_search"):
+		ws = WebsiteSearch(INDEX_NAME)
+		ws.documents = items_to_index
+		# ws.create_index()
+		ws.build_index()
+
+	return "OK"

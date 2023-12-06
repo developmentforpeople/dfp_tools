@@ -26,12 +26,9 @@ async function load_website_sitemap(wrapper) {
 		// Refresh data ???
 	} else {
 		$parent.empty()
-
-		let assets = []
-		assets.push('dfp_website_sitemap.bundle.js')
-	
+		let assets = ['page_dfp_website_sitemap.bundle.js']
 		await frappe.require(assets)
-		frappe.dfp_website_sitemap = new frappe.ui.DFPWebsiteSitemap({
+		frappe.dfp.website_sitemap = new frappe.ui.DFPWebsiteSitemap({
 			wrapper: $parent,
 			page: wrapper.page,
 			website_sitemap: route[1],

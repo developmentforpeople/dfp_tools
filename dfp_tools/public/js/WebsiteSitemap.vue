@@ -1,7 +1,10 @@
 <template>
-	<div class="dfp-website-sitemap-app" v-loading="store.routes_loading">
+	<div class="dfp-website-sitemap-component" v-loading="store.routes_loading">
 
 		<h4>{{ __('Found {} routes', [store.routes.length]) }}</h4>
+
+		<div ref="chartContainer" style="width: 100%; height: 500px;"></div>
+		<hr>
 
 		<el-table
 			:data="routes_filtered"
@@ -89,13 +92,93 @@
 
 <!-- <script lang="ts" setup> -->
 <script setup>
-console.log('DFP Website Sitemap: App.vue loaded')
 
 import { ref, watch, computed } from 'vue'
-import { useStore } from './store'
+import { onMounted, onUnmounted } from 'vue'
+import { useStore } from './website_sitemap_store.js'
 
 const store = useStore()
 store.fetch()
+
+
+const chartContainer = ref(null)
+let myChart = null
+onMounted(async () => {
+	if (chartContainer.value !== null) {
+		myChart = frappe.dfp.ECharts.init(chartContainer.value)
+		myChart.showLoading()
+		await loadData()
+		myChart.hideLoading()
+
+
+		function onChartClick(params) {
+			console.log('echart clicked: ', params)
+			// if (params.componentType === 'series') {
+			// 	const url = 'https://example.com/' + encodeURIComponent(params.name)
+			// 	window.open(url, '_blank')
+			// }
+		}
+		myChart.on('click', onChartClick)
+
+
+	}
+	window.addEventListener('resize', () => {
+		myChart.resize()
+	})
+})
+onUnmounted(() => {
+	window.removeEventListener('resize', () => {
+		myChart.resize()
+	})
+})
+
+const data_url = '/assets/dfp_tools/les-miserables.json'
+
+async function loadData() {
+	const response = await fetch(data_url)
+	let graph = await response.json()
+	let option = {
+		tooltip: {},
+		legend: [
+		{
+			data: graph.categories.map(a => {
+				return a.name
+			})
+		}
+		],
+		series: [
+		{
+			name: 'Les Miserables',
+			type: 'graph',
+			layout: 'none',
+			data: graph.nodes,
+			links: graph.links,
+			categories: graph.categories,
+			roam: true,
+			label: {
+				show: true,
+				position: 'right',
+				formatter: '{b}'
+			},
+			labelLayout: {
+				hideOverlap: true
+			},
+			scaleLimit: {
+				min: 0.4,
+				max: 2
+			},
+			lineStyle: {
+				color: 'source',
+				curveness: 0.3
+			}
+		}
+		]
+	}
+	myChart.setOption(option)
+
+	option && myChart.setOption(option)
+}
+
 
 // const defaultProps = {
 //   children: 'children',
@@ -127,15 +210,6 @@ const scrollTo = selector => {
 
 
 <style lang="scss">
-@import 'element-plus/dist/index.css';
-a.el-link {
-	i.el-icon {
-		margin-right: 4px;
-	}
-	&:hover {
-		text-decoration: none !important;
-	}
-}
 </style>
 
 <style lang="scss" scoped>

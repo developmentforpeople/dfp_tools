@@ -10,7 +10,7 @@ import { ref } from 'vue'
 // import { useDebouncedRefHistory, onKeyDown, useActiveElement } from "@vueuse/core";
 
 
-export const useStore = defineStore('store-main', () => {
+export const useStore = defineStore('dfp-tools-website-sitemap-store', () => {
 	let routes = ref([])
 	let routes_loading = ref(false)
 

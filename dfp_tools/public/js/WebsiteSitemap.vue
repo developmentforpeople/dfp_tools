@@ -95,9 +95,9 @@
 
 import { ref, watch, computed } from 'vue'
 import { onMounted, onUnmounted } from 'vue'
-import { useStore } from './website_sitemap_store.js'
+import { dfpWebsiteSitemapStore } from './website_sitemap_store.js'
 
-const store = useStore()
+const store = dfpWebsiteSitemapStore()
 store.fetch()
 
 

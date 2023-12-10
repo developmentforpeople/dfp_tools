@@ -8,14 +8,14 @@ import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 // ElementPlus css loaded within App.vue
 import { createPinia } from 'pinia'
-import { useStore } from './website_sitemap_store.js'
+import { dfpWebsiteSitemapStore } from './website_sitemap_store.js'
 
 
 import App from './App.vue'
 
-let mounted = null
+let app_created = null
 
-function createAppFactory() {
+function appCreateFactory() {
 	// let app = createApp(App, { website_sitemap: this.website_sitemap })
 	const app = createApp(App)
 	// SetVueGlobals(app)
@@ -37,12 +37,13 @@ function createAppFactory() {
 	const pinia = createPinia()
 	app.use(pinia)
 
-	frappe.dfp.store = useStore()
+	// Our stores
+	frappe.dfp.website_sitemap_store = dfpWebsiteSitemapStore()
 
-	if (mounted) {
-		mounted.unmount()
+	if (app_created) {
+		app_created.unmount()
 	}
-	mounted = app
+	app_created = app
 	return app
 }
 
@@ -50,4 +51,4 @@ function createAppFactory() {
 // 	console.log('frappe.router.on change', frappe.router.current_route)
 // })
 
-frappe.dfp.app = () => createAppFactory()
+frappe.dfp.appCreate = () => appCreateFactory()

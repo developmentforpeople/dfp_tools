@@ -24,7 +24,7 @@ class DFPWebsiteSitemap {
 
 		// setup page actions
 		this.page.add_inner_button(__('Load pages'), () => {
-			frappe.dfp.store.fetch()
+			frappe.dfp.website_sitemap_store.fetch()
 		})
 		this.page.add_inner_button(__('Search index build'), () => {
 			frappe.confirm(__('Este proceso tardará y te deslogueará automáticamente. Al terminar irás al login.'), () => {
@@ -63,7 +63,7 @@ class DFPWebsiteSitemap {
 	}
 
 	setup_app() {
-		let app = frappe.dfp.app()
+		let app = frappe.dfp.appCreate()
 		app.config.globalProperties.$dfp_main_component = 'website_sitemap'
 		app.mount(this.$wrapper.get(0))
 	}

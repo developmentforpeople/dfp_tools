@@ -1,7 +1,7 @@
 
 (function() {
-	let page_name = 'dfp-website-sitemap'
-	let page_title = __('DFP Website Sitemap')
+	let page_name = 'dfp-website-config'
+	let page_title = __('DFP Website site_config.json')
 	let page = null
 	let app = null
 
@@ -42,38 +42,20 @@
 		// If no app, create it and mount it in "main-section"
 		const $main_section = $(wrapper).find('.layout-main-section')
 		$main_section.empty()
-
+	
 		// Page setup
 		page = wrapper.page
 		page.set_title(page_title)
-		page.add_inner_button(__('Load pages'), routes_load)
-		page.add_inner_button(__('Search index build'), index_build)
-
+		page.add_inner_button(__('Config bla bla bla'), action_a)
+	
 		// Main Vue app
 		app = frappe.dfp.appCreate({ page_name: page_name })
 		app.mount($main_section.get(0))
 	}
 
 
-	function routes_load() {
-		frappe.dfp.Sitemap.fetch()
-	}
-
-
-	function index_build() {
-		frappe.confirm(__('Este proceso tardará y te deslogueará automáticamente. Al terminar irás al login.'), () => {
-			frappe.call({
-				freeze: 1,
-				freeze_message: __('Building search index...'),
-				method: 'dfp_tools.dfp_tools.page.dfp_website_sitemap.dfp_website_sitemap.build_index_for_all_routes',
-				// args: {},
-				callback: r => {
-					console.log(r)
-				},
-				error: () => {
-				},
-			})
-		})
+	function action_a() {
+		alert('aha...')
 	}
 
 

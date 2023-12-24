@@ -1,0 +1,14 @@
+
+// @import '~element-plus/dist/index'; // ERROR aquí PERO BIEN en Vue components!!!
+@import 'dfp_tools/public/node_modules/element-plus/dist/index'; // OK!
+// @import 'dfp_tools/node_modules/element-plus/dist/index.css'; // ERROR!
+// @import '../node_modules/element-plus/dist/index.css'; // ERROR!
+
+a.el-link {
+	i.el-icon {
+		margin-right: 4px;
+	}
+	&:hover {
+		text-decoration: none !important;
+	}
+}

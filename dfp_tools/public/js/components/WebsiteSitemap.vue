@@ -1,5 +1,5 @@
 <template>
-	<div class="dfp-website-sitemap-component" v-loading="store.routes_loading">
+	<div class="dfp-website-sitemap-component" v-loading="store.loading">
 
 		<h4>{{ __('Found {} routes', [store.routes.length]) }}</h4>
 
@@ -95,10 +95,22 @@
 
 import { ref, watch, computed } from 'vue'
 import { onMounted, onUnmounted } from 'vue'
-import { dfpWebsiteSitemapStore } from './website_sitemap_store.js'
+import { reactive, watchEffect } from 'vue'
+import { Observer } from '../classes/Observers.js'
 
-const store = dfpWebsiteSitemapStore()
-store.fetch()
+
+const dfp_sitemap = frappe.dfp.Sitemap
+
+const store = reactive(dfp_sitemap.modelGetObject())
+
+const sitemap_observer = new Observer(dfp_sitemap.observableOnChange)
+sitemap_observer.subscribe(changed => {
+	if (changed === 'routes') {
+		store.routes = frappe.dfp.Sitemap.routes
+	} else if (changed === 'loading') {
+		store.loading = frappe.dfp.Sitemap.loading
+	}
+})
 
 
 const chartContainer = ref(null)
@@ -190,12 +202,12 @@ async function loadData() {
 // })
 
 const search = ref('')
-const routes_filtered = computed(() =>
-	store.routes.filter(data => {
+const routes_filtered = computed(() => {
+	return store.routes.filter(data => {
 		let searched_string = `${data.route_absolute} ${data.file_or_doctype}`.toLowerCase()
 		return !search.value || searched_string.includes(search.value.toLowerCase())
 	})
-)
+})
 const handleEdit = (index, row) => {
 	console.log(index, row)
 }

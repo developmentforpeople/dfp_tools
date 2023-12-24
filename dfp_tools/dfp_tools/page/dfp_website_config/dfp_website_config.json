@@ -1,0 +1,24 @@
+{
+ "content": null,
+ "creation": "2023-12-20 22:10:29.394597",
+ "docstatus": 0,
+ "doctype": "Page",
+ "icon": "",
+ "idx": 0,
+ "modified": "2023-12-20 22:10:29.394597",
+ "modified_by": "Administrator",
+ "module": "DFP Tools",
+ "name": "dfp-website-config",
+ "owner": "Administrator",
+ "page_name": "dfp-website-config",
+ "roles": [
+  {
+   "role": "Website Manager"
+  }
+ ],
+ "script": null,
+ "standard": "Yes",
+ "style": null,
+ "system_page": 0,
+ "title": "DFP website_config.json"
+}

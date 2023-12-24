@@ -1,6 +1,6 @@
 {
  "charts": [],
- "content": "[{\"id\":\"UUfh6GW9RY\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">DFP Tools</span>\",\"col\":12}},{\"id\":\"waNiVM9InU\",\"type\":\"card\",\"data\":{\"card_name\":\"Website\",\"col\":4}}]",
+ "content": "[{\"id\":\"UUfh6GW9RY\",\"type\":\"header\",\"data\":{\"text\":\"<span class=\\\"h4\\\">DFP Tools</span>\",\"col\":12}},{\"id\":\"waNiVM9InU\",\"type\":\"card\",\"data\":{\"card_name\":\"Sitio Web\",\"col\":4}}]",
  "creation": "2023-06-18 10:26:09.450249",
  "custom_blocks": [],
  "docstatus": 0,
@@ -15,8 +15,8 @@
   {
    "hidden": 0,
    "is_query_report": 0,
-   "label": "Website",
-   "link_count": 1,
+   "label": "Sitio Web",
+   "link_count": 2,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -29,9 +29,19 @@
    "link_type": "Page",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 0,
+   "label": "Website site_config.json",
+   "link_count": 0,
+   "link_to": "dfp-website-config",
+   "link_type": "Page",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2023-12-03 09:18:08.321392",
+ "modified": "2023-12-20 22:11:35.197511",
  "modified_by": "Administrator",
  "module": "DFP Tools",
  "name": "DFP Tools",

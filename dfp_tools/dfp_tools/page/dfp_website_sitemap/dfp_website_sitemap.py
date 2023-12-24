@@ -2,6 +2,7 @@ from typing import Tuple
 from typing import Any
 import os
 import re
+import inspect
 from glob import glob
 from werkzeug.wrappers import Response
 import frappe
@@ -34,7 +35,7 @@ WEBSITE_SEARCH_INDEX_IGNORE_LIST_ENDSWITH = [
 ]
 
 
-@frappe.whitelist()
+# @frappe.whitelist()
 def doctypes_with_webview():
 	"""Returns doctypes with webview enabled"""
 	filters = { "has_web_view": 1 }#, "allow_guest_to_view": 1, "index_web_pages_for_search": 1}
@@ -45,6 +46,12 @@ def doctypes_with_webview():
 @frappe.whitelist()
 def get_web_pages():
 
+	from frappe.api import API_URL_MAP
+	for r in API_URL_MAP.iter_rules():
+		print(r)
+	# endpoint, arguments = API_URL_MAP.bind_to_environ(request.environ).match()
+	# print("endpoint", endpoint)
+
 	pages_by_route = {}
 
 	page_tpl = frappe._dict({
@@ -54,16 +61,30 @@ def get_web_pages():
 		"path": "", # static file path
 		"route": "",
 		"route_absolute": "",
+		"is_public": 1, # Guest can view
+		"api_methods": [],
 		"redirected_301": "",
-		# "no_cache": "",
-		# "sitemap": "",
 		"doctype": "",
 		"doc_name": "",
-		"doc_allow_guest_to_view": "",
 		"doc_index_web_pages_for_search": "",
 		"doc_is_published_field": "",
 		"doc_website_search_field": "",
 	})
+
+	def api_page_add(app, path, route, methods, is_public):
+		page = page_tpl.copy()
+		page.app = app
+		page.file_or_doctype = path # used for table sorting
+		page.type = "api"
+		page.path = path
+		page.route = route
+		page.route_absolute = f"/{route}"
+		page.is_public = 1 if is_public else 0
+		page.api_methods = methods
+		if route in pages_by_route:
+			pages_by_route[route].append(page)
+		else:
+			pages_by_route[route] = [page]
 
 	def static_page_add(app, path, route):
 		page = page_tpl.copy()
@@ -73,7 +94,6 @@ def get_web_pages():
 		page.path = path
 		page.route = route
 		page.route_absolute = f"/{route}"
-		# page.edit = ""
 		if route in pages_by_route:
 			pages_by_route[route].append(page)
 		else:
@@ -88,7 +108,7 @@ def get_web_pages():
 		page.route_absolute = f"/{doc_page.route}"
 		page.doctype = doctype.name
 		page.doc_name = doc_page.name
-		page.doc_allow_guest_to_view = doctype.allow_guest_to_view
+		page.is_public = 1 if doctype.allow_guest_to_view else 0
 		page.doc_index_web_pages_for_search = doctype.index_web_pages_for_search
 		page.doc_is_published_field = doctype.is_published_field
 		page.doc_website_search_field = doctype.website_search_field
@@ -101,6 +121,7 @@ def get_web_pages():
 			pages_by_route[doc_page.route] = [page]
 
 	try:
+		# 1. Files in apps/www
 		bench_path = frappe.utils.get_bench_path()
 		apps_path = os.path.join(bench_path, "apps")
 		apps = frappe.get_installed_apps()
@@ -121,7 +142,7 @@ def get_web_pages():
 				file_without_bench = file[len(apps_path)+1:]
 				static_page_add(app=app, path=file_without_bench, route=route)
 
-		# Doctype with web views
+		# 2. Doctype with web views
 		# filters = {"has_web_view": 1}#, "allow_guest_to_view": 1, "index_web_pages_for_search": 1}
 		# fields = ["name", "is_published_field", "website_search_field", "allow_guest_to_view", "index_web_pages_for_search"]
 		# doctype_with_web_views = frappe.get_all("DocType", filters=filters, fields=fields)
@@ -145,6 +166,14 @@ def get_web_pages():
 				for doc_page in docs:
 					doctype_page_add(doctype=doctype, doc_page=doc_page)
 				# all_routes += [route.route for route in docs]
+
+		# 3. API whitelisted methods
+		for fn, methods in frappe.allowed_http_methods_for_whitelisted_func.items():
+			app = inspect.getmodule(fn).__name__.split(".")[0]
+			path = f"{inspect.getmodule(fn).__name__}.{fn.__name__}"
+			route = f"api/method/{path}"
+			is_public = 1 if fn in frappe.guest_methods else 0
+			api_page_add(app, path, route, methods, is_public)
 
 	except Exception as e:
 		frappe.log_error("Error in DFP website sitemap get_web_pages", e)
@@ -176,23 +205,23 @@ def get_render_instance(path:str) -> Tuple[(NotFoundPage | RedirectPage | Templa
 	return None, endpoint
 
 
-def get_response(path=None):
-	"""Resolves path and renders page"""
-	response = None
+# def get_response(path=None):
+# 	"""Resolves path and renders page"""
+# 	response = None
 
-	try:
-		renderer, endpoint = get_render_instance(path=path)
-		response = renderer.render()
-	except frappe.Redirect:
-		return RedirectPage(endpoint or path, http_status_code).render()
-	except frappe.PermissionError as e:
-		response = NotPermittedPage(endpoint, http_status_code, exception=e).render()
-	except frappe.PageDoesNotExistError:
-		response = NotFoundPage(endpoint, http_status_code).render()
-	except Exception as e:
-		response = ErrorPage(exception=e).render()
+# 	try:
+# 		renderer, endpoint = get_render_instance(path=path)
+# 		response = renderer.render()
+# 	except frappe.Redirect:
+# 		return RedirectPage(endpoint or path, http_status_code).render()
+# 	except frappe.PermissionError as e:
+# 		response = NotPermittedPage(endpoint, http_status_code, exception=e).render()
+# 	except frappe.PageDoesNotExistError:
+# 		response = NotFoundPage(endpoint, http_status_code).render()
+# 	except Exception as e:
+# 		response = ErrorPage(exception=e).render()
 
-	return response
+# 	return response
 
 
 @frappe.whitelist()

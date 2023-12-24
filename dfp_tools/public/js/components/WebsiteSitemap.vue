@@ -13,6 +13,13 @@
 			border
 			default-expand-all
 		>
+			<el-table-column prop="is_public" label="Public access">
+				<template #default="scope">
+					<i v-if="scope.row.is_public" class="fa fa-globe"></i>
+					<i v-else class="fa fa-lock"></i>
+				</template>
+			</el-table-column>
+
 			<el-table-column prop="route_absolute" label="Path" sortable>
 				<template #default="scope">
 					<el-link

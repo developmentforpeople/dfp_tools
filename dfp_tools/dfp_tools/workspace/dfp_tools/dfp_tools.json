@@ -16,7 +16,7 @@
    "hidden": 0,
    "is_query_report": 0,
    "label": "Sitio Web",
-   "link_count": 2,
+   "link_count": 3,
    "onboard": 0,
    "type": "Card Break"
   },
@@ -39,9 +39,19 @@
    "link_type": "Page",
    "onboard": 0,
    "type": "Link"
+  },
+  {
+   "hidden": 0,
+   "is_query_report": 1,
+   "label": "Report website routes",
+   "link_count": 0,
+   "link_to": "DFP Website Routes",
+   "link_type": "Report",
+   "onboard": 0,
+   "type": "Link"
   }
  ],
- "modified": "2023-12-20 22:11:35.197511",
+ "modified": "2023-12-24 16:06:56.014959",
  "modified_by": "Administrator",
  "module": "DFP Tools",
  "name": "DFP Tools",

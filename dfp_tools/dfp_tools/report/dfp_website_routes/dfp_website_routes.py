@@ -100,10 +100,8 @@ def get_data(filters):
 			continue
 
 		if len(item["page"]) > 1:
-			page_active["override"] =item["page"]
-			# remove last item
+			page_active["override"] = item["page"]
 			page_active["override"].pop()
-			# reverse order
 			page_active["override"].reverse()
 
 		rows.append({

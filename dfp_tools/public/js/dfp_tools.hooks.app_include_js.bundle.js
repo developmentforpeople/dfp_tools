@@ -14,6 +14,7 @@ frappe.dfp.Sitemap = new Sitemap()
 
 import Page from './components/Page.vue'
 
+// Store and reuse created page apps per "page"
 frappe.dfp.apps_per_page = {}
 
 function appCreateFactory(properties) {

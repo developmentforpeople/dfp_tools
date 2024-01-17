@@ -5,7 +5,6 @@
 		<template v-else>
 			<el-empty :description="__('Nothing to show yet 🙃')" />
 		</template>
-
 	</div>
 </template>
 

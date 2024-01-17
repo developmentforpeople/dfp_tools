@@ -11,8 +11,14 @@ app_license = "MIT"
 # ------------------
 
 # include js, css files in header of desk.html
-app_include_js = "dfp_tools.hooks.app_include_js.bundle.js"
-app_include_css = "dfp_tools.hooks.app_include_css.bundle.css"
+app_include_js = [
+	"dfp_tools.hooks.app_include_js.bundle.js",
+	# TODO: tests for videojs and plyr and hls
+	# "https://cdnjs.cloudflare.com/ajax/libs/hls.js/1.4.14/hls.min.js",
+	# "https://vjs.zencdn.net/8.9.0/video.min.js",
+	# "https://cdn.plyr.io/3.7.8/plyr.polyfilled.js",
+]
+app_include_css = ["dfp_tools.hooks.app_include_css.bundle.css"]
 
 # include js, css files in header of web template
 # web_include_css = "/assets/dfp_tools/css/dfp_tools.css"
